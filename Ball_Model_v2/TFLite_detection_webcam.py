@@ -25,6 +25,15 @@ import importlib.util
 
 # Define VideoStream class to handle streaming of video from webcam in separate processing thread
 # Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
+
+# H_FOV = 0.7610
+# V_FOV = 0.5829
+
+
+
+
+
+
 class VideoStream:
     """Camera object that controls video streaming from the Picamera"""
     def __init__(self,resolution=(640,480),framerate=30):
@@ -89,6 +98,10 @@ min_conf_threshold = float(args.threshold)
 resW, resH = args.resolution.split('x')
 imW, imH = int(resW), int(resH)
 use_TPU = args.edgetpu
+
+d = 1143
+F = 4
+WIDTH = 38
 
 # Import TensorFlow libraries
 # If tflite_runtime is installed, import interpreter from tflite_runtime, else import from regular tensorflow
@@ -207,6 +220,12 @@ while True:
             xmax = int(min(imW,(boxes[i][3] * imW)))
             
             cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
+
+            w = xmax - xmin
+
+            distnace = (WIDTH * F) / w
+
+            print(distnace)
 
             # Draw label
             object_name = labels[int(classes[i])] # Look up object name from "labels" array using class index
