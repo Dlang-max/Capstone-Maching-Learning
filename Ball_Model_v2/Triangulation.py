@@ -349,6 +349,9 @@ while True:
             cv2.rectangle(frameR, (xminR, label_ymin-labelSize[1]-10), (xminR+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
             cv2.putText(frameR, label, (xminR, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
 
+    cv2.line(frameR, (imW // 2, 0), (imW // 2, imH), (0, 255, 0), 2) # Draw white line
+    cv2.line(frameR, (0, imH // 2), ( imW, imH // 2), (0, 255, 0), 2) # Draw white line
+
     for i in range(len(scores_left)):
         if ((scores_left[i] > min_conf_threshold) and (scores_left[i] <= 1.0)):
 
@@ -374,7 +377,12 @@ while True:
             labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2) # Get font size
             label_ymin = max(yminL, labelSize[1] + 10) # Make sure not to draw label too close to top of window
             cv2.rectangle(frameL, (xminL, label_ymin-labelSize[1]-10), (xminR+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
+
+
             cv2.putText(frameL, label, (xminL, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
+
+    cv2.line(frameL, (imW // 2, 0), (imW // 2, imH), (0, 255, 0), 2) # Draw white line
+    cv2.line(frameL, (0, imH // 2), ( imW, imH // 2), (0, 255, 0), 2) # Draw white line
 
     # Draw framerate in corner of frame
     cv2.putText(frameR,'FPS: {0:.2f}'.format(frame_rate_calc),(0, 150),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
