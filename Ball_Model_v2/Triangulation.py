@@ -237,7 +237,7 @@ def location(camera_distance, rcamera, lcamera, center=False, degrees=True):
     if center:
             X -= camera_distance / 2
     
-    D = distance_from_origin(X,Y,Z)
+    D = math.sqrt( X * X + Y * Y + Z * Z )
 
     return X, Y, Z, D
 
@@ -377,7 +377,7 @@ while True:
             cv2.putText(frameL, label, (xminL, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
 
     # Draw framerate in corner of frame
-    cv2.putText(frameR,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
+    cv2.putText(frameR,'FPS: {0:.2f}'.format(frame_rate_calc),(0, 150),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
 
     # All the results have been drawn on the frame, so it's time to display it.
     frame_concat = cv2.hconcat([frameR, frameL])
@@ -387,7 +387,7 @@ while True:
 
     X, Y, Z, D = location( CAMERA_DISTANCE, (xrangle, yrangle), (xlangle, ylangle), center=True, degrees=True )
 
-    text = 'X: {:3.1f}\nY: {:3.1f}\nZ: {:3.1f}\nD:'.format(X,Y,Z,D )
+    text = 'X: {:3.1f}\nY: {:3.1f}\nZ: {:3.1f}\nD: {:3.1f}'.format(X,Y,Z,D )
     lineloc = 0
     lineheight = 30
     for t in text.split('\n'):
