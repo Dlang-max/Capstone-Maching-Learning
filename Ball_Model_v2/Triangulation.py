@@ -43,7 +43,7 @@ class VideoStream:
         ret = self.stream.set(3,resolution[0])
         ret = self.stream.set(4,resolution[1])
         ret = self.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # disable auto-exposure
-        ret = self.stream.set(cv2.CAP_PROP_EXPOSURE, -9)  # set the exposure to -4 (corresponds to a shutter speed of 1/1000)
+        ret = self.stream.set(cv2.CAP_PROP_EXPOSURE, -6)  # set the exposure to -4 (corresponds to a shutter speed of 1/1000)
         ret = self.stream.set(10, 400)
 
 
@@ -108,7 +108,7 @@ use_TPU = args.edgetpu
 X_FOCAL_LEN = (imW / 2) /  math.tan(math.radians(H_FOV / 2))
 Y_FOCAL_LEN = (imH / 2) /  math.tan(math.radians(V_FOV / 2))
 
-CAMERA_DISTANCE = 1
+CAMERA_DISTANCE = 0.3175
 
 # Import TensorFlow libraries
 # If tflite_runtime is installed, import interpreter from tflite_runtime, else import from regular tensorflow
@@ -198,7 +198,7 @@ freq = cv2.getTickFrequency()
 
 # Initialize video stream
 videostream_right = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=0, run=True).start()
-videostream_left = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=1, run=False).start()
+videostream_left = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=2, run=True).start()
 
 time.sleep(1)
 
@@ -242,7 +242,7 @@ def location(camera_distance, rcamera, lcamera, center=False, degrees=True):
     return X, Y, Z, D
 
 
-def intersection(camera_distance, rangle, langle, degrees=False):
+def intersection(camera_distance, langle, rangle, degrees=False):
     if degrees:
             rangle = math.radians(rangle)
             langle = math.radians(langle)
@@ -376,7 +376,7 @@ while True:
             label = '%s: %d%%' % (object_name, int(scores_left[i]*100)) # Example: 'person: 72%'
             labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2) # Get font size
             label_ymin = max(yminL, labelSize[1] + 10) # Make sure not to draw label too close to top of window
-            cv2.rectangle(frameL, (xminL, label_ymin-labelSize[1]-10), (xminR+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
+            cv2.rectangle(frameL, (xminL, label_ymin-labelSize[1]-10), (xminL+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
 
 
             cv2.putText(frameL, label, (xminL, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
@@ -385,10 +385,10 @@ while True:
     cv2.line(frameL, (0, imH // 2), ( imW, imH // 2), (0, 255, 0), 2) # Draw white line
 
     # Draw framerate in corner of frame
-    cv2.putText(frameR,'FPS: {0:.2f}'.format(frame_rate_calc),(0, 150),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
+    cv2.putText(frameL,'FPS: {0:.2f}'.format(frame_rate_calc),(0, 150),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
 
     # All the results have been drawn on the frame, so it's time to display it.
-    frame_concat = cv2.hconcat([frameR, frameL])
+    frame_concat = cv2.hconcat([frameL, frameR])
 
     xrangle, yrangle = angles_from_center( x_right, y_right, top_left=True, degrees=True)
     xlangle, ylangle = angles_from_center( x_left, y_left, top_left=True, degrees=True)
