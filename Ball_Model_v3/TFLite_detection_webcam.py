@@ -14,7 +14,7 @@
 # I added my own method of drawing boxes and labels using OpenCV.
 
 # Import packages
-from pyntcore import NetworkTableInstance, EventFlags
+from ntcore import NetworkTableInstance, EventFlags
 import os
 import argparse
 import cv2
