@@ -1,4 +1,4 @@
-from ntcore import NetworkTableInstance
+from ntcore import NetworkTableInstance, EventFlags
 
 import cv2
 import mediapipe as mp
@@ -16,7 +16,9 @@ right = hitTable.getBooleanTopic("rightClosed").publish()
 left = hitTable.getBooleanTopic("leftClosed").publish()
 
 
-
+ntinst.startClient4("wpilibpi")
+ntinst.setServerTeam(4930)
+ntinst.startDSClient()
 
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -30,9 +32,10 @@ pTime = 0
 cTime = 0
  
 while True:
-    success, img = cap.read()
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    results = hands.process(imgRGB)
+    success, imgage = cap.read()
+    imgRGB = cv2.cvtColor(imgage, cv2.COLOR_BGR2RGB)
+    img = cv2.flip(imgRGB, 1)
+    results = hands.process(img)
 
     landmark_5 = 0
     landmark_17 = 0
@@ -92,7 +95,7 @@ while True:
 
             if(xFollow > elbowRectangle[0] and xFollow < elbowRectangle[2] and yFollow > elbowRectangle[1] and yFollow < elbowRectangle[3]):
                 cv2.rectangle(img, (20, 0), (200, 720), (0, 255, 0), 5)
-                cv2.line(img, (xFollow, yFollow), (110, 360), (255, 255, 255), 2)
+                cv2.line(img, (xFollow, yFollow), (110, 360), (255, 255, 255), 5)
                 elbowDistance = math.sqrt((xFollow - 110)**2 + (yFollow - 360)**2)
                 if( yFollow - 360 > 0 ):
                     elbowDistance = elbowDistance * -1
@@ -105,11 +108,11 @@ while True:
 
             if(xFollow > slideRectangle[0] and xFollow < slideRectangle[2] and yFollow > slideRectangle[1] and yFollow < slideRectangle[3]):
                 cv2.rectangle(img, (600, 540), (1280, 720), (0, 255, 0), 5)
-                cv2.line(img, (xFollow, yFollow), (940, 630), (255, 255, 255), 2)
+                cv2.line(img, (xFollow, yFollow), (940, 630), (255, 255, 255), 5)
                 slideDistance = math.sqrt((xFollow - 940)**2 + (yFollow - 630)**2)
                 if( xFollow - 940 < 0 ):
                     slideDistance = slideDistance * -1
-                slidePower = (slideDistance - 0) / (350 - 0 ) / 2
+                slidePower = (slideDistance - 0) / (350 - 0 ) / 4
                 if(handWidth < 100):
                     slideClosed = True
                     slidePower = 0.0
