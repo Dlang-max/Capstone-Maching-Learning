@@ -36,6 +36,10 @@ confidence = coordinatesTable.getIntegerTopic("confidence").publish()
 foundTable = ntinst.getTable('Found')
 found = foundTable.getBooleanTopic("ballFound").publish()
 
+ntinst.startClient4("wpilibpi")
+ntinst.setServerTeam(4930)
+ntinst.startDSClient()
+
 
 
 
@@ -195,7 +199,8 @@ while True:
     frame1 = videostream.read()
 
     # Acquire frame and resize to expected shape [1xHxWx3]
-    frame = frame1.copy()
+    frame2 = frame1.copy()
+    frame =  cv2.flip(frame, -1)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame_resized = cv2.resize(frame_rgb, (width, height))
     input_data = np.expand_dims(frame_resized, axis=0)
@@ -265,13 +270,6 @@ while True:
         foundBall = True
 
     found.set(foundBall)
-
-    
-
-
-
-
-
 
     # Draw framerate in corner of frame
     cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
