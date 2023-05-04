@@ -14,6 +14,8 @@
 # I added my own method of drawing boxes and labels using OpenCV.
 
 # Import packages
+from matplotlib import animation
+import matplotlib.pyplot as plt
 import os
 import argparse
 import cv2
@@ -412,6 +414,7 @@ while True:
                     False) #
 
     cv2.imshow('Object detector', frame_concat)
+
 
     # Calculate framerate
     t2 = cv2.getTickCount()

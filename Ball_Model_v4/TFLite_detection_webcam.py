@@ -55,7 +55,7 @@ class VideoStream:
         ret = self.stream.set(3,resolution[0])
         ret = self.stream.set(4,resolution[1])
         ret = self.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25) 
-        ret = self.stream.set(cv2.CAP_PROP_EXPOSURE, -8)
+        ret = self.stream.set(cv2.CAP_PROP_EXPOSURE, -10)
             
         # Read first frame from the stream
         (self.grabbed, self.frame) = self.stream.read()
@@ -201,7 +201,7 @@ while True:
 
     # Acquire frame and resize to expected shape [1xHxWx3]
     frame2 = frame1.copy()
-    frame =  cv2.flip(frame2, -1)
+    frame = cv2.flip(frame2, 0)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame_resized = cv2.resize(frame_rgb, (width, height))
     input_data = np.expand_dims(frame_resized, axis=0)
@@ -236,6 +236,12 @@ while True:
             ymax = int(min(imH,(boxes[i][2] * imH)))
             xmax = int(min(imW,(boxes[i][3] * imW)))
 
+            print("xMin: ", xmin)
+            print("xMax: ", xmax)
+            print("yMin: ", ymin)
+            print("yMax: ", ymax)
+
+
             w = xmax - xmin
 
             if(w > largestWidth):
@@ -253,24 +259,33 @@ while True:
             cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
 
     if(index != -1):
+
         ymin = int(max(1,(boxes[index][0] * imH)))
         xmin = int(max(1,(boxes[index][1] * imW)))
         ymax = int(min(imH,(boxes[index][2] * imH)))
         xmax = int(min(imW,(boxes[index][3] * imW)))
 
-        cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 165, 255), 2)
+        xWidth = xmax -xmin
+        yWidth = ymax - ymin
 
+        cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 165, 255), 2)
 
         percent = int(scores[i] * 100)
 
         
-        yCenter.set(int(ymax - ymin))
-        xCenter.set(int(xmax - xmin))
+        yCenter.set(int(ymin + yWidth))
+        xCenter.set(int(xmin + xWidth))
         confidence.set(percent)
 
         foundBall = True
+    
+    if(index == 1):
+        xCenter.set(int(1280 / 2))
+        yCenter.set(int(720 / 2))
+
 
     found.set(foundBall)
+    print(foundBall)
 
     # Draw framerate in corner of frame
     cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
