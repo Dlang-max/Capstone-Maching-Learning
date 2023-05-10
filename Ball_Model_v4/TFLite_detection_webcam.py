@@ -48,7 +48,7 @@ ntinst.startDSClient()
 # Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
 class VideoStream:
     """Camera object that controls video streaming from the Picamera"""
-    def __init__(self,resolution=(640,480),framerate=30):
+    def __init__(self,resolution=(640,480),framerate=60):
         # Initialize the PiCamera and the camera image stream
         self.stream = cv2.VideoCapture(0)
         ret = self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
@@ -247,7 +247,7 @@ while True:
             if(w > largestWidth):
                 largestWidth = w
                 index = i
-            
+                
             cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
 
             # Draw label
@@ -265,7 +265,7 @@ while True:
         ymax = int(min(imH,(boxes[index][2] * imH)))
         xmax = int(min(imW,(boxes[index][3] * imW)))
 
-        xWidth = xmax -xmin
+        xWidth = xmax - xmin
         yWidth = ymax - ymin
 
         cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), (0, 165, 255), 2)
@@ -279,7 +279,7 @@ while True:
 
         foundBall = True
     
-    if(index == 1):
+    if(index == -1):
         xCenter.set(int(1280 / 2))
         yCenter.set(int(720 / 2))
 

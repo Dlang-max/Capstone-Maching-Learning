@@ -1,5 +1,4 @@
 from ntcore import NetworkTableInstance, EventFlags
-import matplotlib.pyplot as plt
 import cv2
 import mediapipe as mp
 import time
@@ -30,14 +29,6 @@ mpDraw = mp.solutions.drawing_utils
  
 pTime = 0
 cTime = 0
-
-ax = plt.axes(projection="3d")
-x_data = np.random.randint(0, 100, (500,))
-y_data = np.random.randint(0, 100, (500,))
-z_data = np.random.randint(0, 100, (500,))
-
-ax.scatter(x_data, y_data, z_data)
-
  
 while True:
     success, image = cap.read()
@@ -90,6 +81,8 @@ while True:
             mpDraw.draw_landmarks(img, handLms, mpHands.HAND_CONNECTIONS)
 
             elbowPower = -1 * (((yFollow - 0) / (720 - 0)) * 2 - 1) / 2 
+            if(elbowPower > 0):
+                elbowPower = elbowPower * 1.5
             slidePower = -1 * (((xFollow - 0) / (1280 - 0 )) * 2 - 1) / 4
 
             if(handWidth < 100):
@@ -129,5 +122,4 @@ while True:
         break
  
     cv2.imshow("Hand Tracker", img)
-    plt.show()
     cv2.waitKey(1)

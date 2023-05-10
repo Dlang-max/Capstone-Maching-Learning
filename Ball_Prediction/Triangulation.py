@@ -14,14 +14,11 @@
 # I added my own method of drawing boxes and labels using OpenCV.
 
 # Import packages
-from kalmanfilter import KalmanFilter
-from ntcore import NetworkTableInstance, EventFlags
-from matplotlib import animation
-import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+from matplotlib import animation
+import matplotlib.pyplot as plt
 import os
 import argparse
 import cv2
@@ -35,33 +32,12 @@ import math
 # Define VideoStream class to handle streaming of video from webcam in separate processing thread
 # Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
 
-kf = KalmanFilter()
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-#Setting up Networktables
-ntinst = NetworkTableInstance.getDefault()
-
-coordinatesTable = ntinst.getTable('Coordinates')
-
-yCenter = coordinatesTable.getIntegerTopic("yCenter").publish()
-xCenter = coordinatesTable.getIntegerTopic("xCenter").publish()
-confidence = coordinatesTable.getIntegerTopic("confidence").publish()
-
-foundTable = ntinst.getTable('Found')
-found = foundTable.getBooleanTopic("ballFound").publish()
-
-ntinst.startClient4("wpilibpi")
-ntinst.setServerTeam(4930)
-ntinst.startDSClient()
-
-H_FOV = 43.60209
-V_FOV = 33.3977099
+H_FOV = 55
+V_FOV = 45
 
 class VideoStream:
     """Camera object that controls video streaming from the Picamera"""
-    def __init__(self,resolution=(640,480),framerate=30, cameraNum=0, run=True ):
+    def __init__(self,resolution=(640,480),framerate=30, cameraNum=0, run=True, num=-10 ):
 
         self.run = run
 
@@ -72,7 +48,7 @@ class VideoStream:
         ret = self.stream.set(3,resolution[0])
         ret = self.stream.set(4,resolution[1])
         ret = self.stream.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # disable auto-exposure
-        ret = self.stream.set(cv2.CAP_PROP_EXPOSURE, -6)  # set the exposure to -4 (corresponds to a shutter speed of 1/1000)
+        ret = self.stream.set(cv2.CAP_PROP_EXPOSURE, -9)  # set the exposure to -4 (corresponds to a shutter speed of 1/1000)
         ret = self.stream.set(10, 400)
 
 
@@ -137,7 +113,7 @@ use_TPU = args.edgetpu
 X_FOCAL_LEN = (imW / 2) /  math.tan(math.radians(H_FOV / 2))
 Y_FOCAL_LEN = (imH / 2) /  math.tan(math.radians(V_FOV / 2))
 
-CAMERA_DISTANCE = 0.3175
+CAMERA_DISTANCE = 0.18
 
 # Import TensorFlow libraries
 # If tflite_runtime is installed, import interpreter from tflite_runtime, else import from regular tensorflow
@@ -226,8 +202,8 @@ frame_rate_calc = 1
 freq = cv2.getTickFrequency()
 
 # Initialize video stream
-videostream_right = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=0, run=True).start()
-videostream_left = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=2, run=True).start()
+videostream_right = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=0, run=True, num=-10).start()
+videostream_left = VideoStream(resolution=(imW,imH),framerate=30, cameraNum=2, run=True, num=-9).start()
 
 time.sleep(1)
 
@@ -270,6 +246,7 @@ def location(camera_distance, rcamera, lcamera, center=False, degrees=True):
 
     return X, Y, Z, D
 
+
 def intersection(camera_distance, langle, rangle, degrees=False):
     if degrees:
             rangle = math.radians(rangle)
@@ -296,11 +273,11 @@ y_right = 0
 x_left = 0
 y_left = 0
 
-ballPositionsXYZ = []
-
 
 #for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
 while True:
+
+    points = np.array([(0, 0, 0)])
 
     # Start timer (for calculating frame rate)
     t1 = cv2.getTickCount()
@@ -422,31 +399,8 @@ while True:
 
     xrangle, yrangle = angles_from_center( x_right, y_right, top_left=True, degrees=True)
     xlangle, ylangle = angles_from_center( x_left, y_left, top_left=True, degrees=True)
+
     X, Y, Z, D = location( CAMERA_DISTANCE, (xrangle, yrangle), (xlangle, ylangle), center=True, degrees=True )
-
-    ballPositionsXYZ.append((X, Y, Z))
-
-    for pt in ballPositionsXYZ:
-        predictedXY = kf.predict(pt[0], pt[1])
-        predictedYZ = kf.predict(pt[1], pt[2])
-
-    for i in range(10):
-        predictedXY = kf.predict(predictedXY[0], predictedXY[1])
-        predictedYZ = kf.predict(predictedYZ[0], predictedYZ[1])
-
-        print((predictedXY[0], predictedYZ[0], predictedYZ[1]))  
-
-
-    predictedXY.clear()
-    predictedYZ.clear()
-
-    if(len(ballPositionsXYZ) > 100):
-        ballPositionsXYZ.clear()
-
-    ax.clear()
-    ax.scatter(ballPositionsXYZ[:, 0], ballPositionsXYZ[:, 1], ballPositionsXYZ[:, 2])
-    plt.draw()
-    plt.pause(0.01)
 
     text = 'X: {:3.1f}\nY: {:3.1f}\nZ: {:3.1f}\nD: {:3.1f}'.format(X,Y,Z,D )
     lineloc = 0
